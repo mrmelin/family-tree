@@ -22,8 +22,6 @@ const fetchFamilyTree = async () => {
   return JSON.parse(storedMembers);
 };
 
-// First occurrence of buildFamilyTree removed
-
 const FamilyMember = ({ member }) => (
   <Link to={`/edit-member/${member.id}`}>
     <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
