@@ -54,8 +54,8 @@ const FamilyTree = () => {
     queryFn: fetchFamilyTree,
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) return <div>Laddar...</div>;
+  if (error) return <div>Fel: {error.message}</div>;
 
   const renderFamilyTree = (node) => (
     <div key={node.id} className="flex flex-col items-center">
@@ -71,13 +71,13 @@ const FamilyTree = () => {
   return (
     <div className="relative">
       <div className="mb-4 flex justify-end space-x-2">
-        <Button variant="outline" size="icon" onClick={() => setZoom(zoom - 10)}>
+        <Button variant="outline" size="icon" onClick={() => setZoom(zoom - 10)} aria-label="Zooma ut">
           <ZoomOut className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => setZoom(100)}>
+        <Button variant="outline" size="icon" onClick={() => setZoom(100)} aria-label="Återställ zoom">
           <Maximize2 className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => setZoom(zoom + 10)}>
+        <Button variant="outline" size="icon" onClick={() => setZoom(zoom + 10)} aria-label="Zooma in">
           <ZoomIn className="h-4 w-4" />
         </Button>
       </div>

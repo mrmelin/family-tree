@@ -13,10 +13,10 @@ const Layout = ({ children }) => {
       {/* Sidebar */}
       <aside className={`w-64 bg-card text-card-foreground p-4 ${sidebarOpen ? 'block' : 'hidden'} md:block`}>
         <nav className="space-y-2">
-          <Link to="/" className="block py-2 px-4 rounded hover:bg-accent">Family Tree</Link>
-          <Link to="/add-member" className="block py-2 px-4 rounded hover:bg-accent">Add Member</Link>
-          <Link to="/timeline" className="block py-2 px-4 rounded hover:bg-accent">Timeline</Link>
-          <Link to="/gallery" className="block py-2 px-4 rounded hover:bg-accent">Media Gallery</Link>
+          <Link to="/" className="block py-2 px-4 rounded hover:bg-accent">Släktträd</Link>
+          <Link to="/add-member" className="block py-2 px-4 rounded hover:bg-accent">Lägg till medlem</Link>
+          <Link to="/timeline" className="block py-2 px-4 rounded hover:bg-accent">Tidslinje</Link>
+          <Link to="/gallery" className="block py-2 px-4 rounded hover:bg-accent">Mediagalleri</Link>
         </nav>
       </aside>
 
@@ -29,11 +29,11 @@ const Layout = ({ children }) => {
               <Button variant="ghost" size="icon" className="md:hidden mr-2" onClick={() => setSidebarOpen(!sidebarOpen)}>
                 <Menu className="h-5 w-5" />
               </Button>
-              <h1 className="text-xl font-bold">Family Tree Collaborator</h1>
+              <h1 className="text-xl font-bold">Melin Släktträd</h1>
             </div>
             <div className="flex items-center space-x-4">
               <div className="hidden md:block">
-                <Input type="search" placeholder="Search..." className="w-64" />
+                <Input type="search" placeholder="Sök..." className="w-64" />
               </div>
               <Button variant="ghost" size="icon">
                 <Search className="h-5 w-5 md:hidden" />

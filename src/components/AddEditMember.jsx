@@ -65,13 +65,11 @@ const AddEditMember = () => {
   const mutation = useMutation({
     mutationFn: saveMember,
     onSuccess: () => {
-      // Handle successful save (e.g., show a success message, redirect)
-      console.log("Member saved successfully");
+      console.log("Medlem sparad framgångsrikt");
       setIsSubmitting(false);
     },
     onError: (error) => {
-      // Handle error (e.g., show error message)
-      console.error("Error saving member:", error);
+      console.error("Fel vid sparande av medlem:", error);
       setIsSubmitting(false);
     },
   });
@@ -81,12 +79,12 @@ const AddEditMember = () => {
     mutation.mutate(data);
   };
 
-  if (isEditing && isLoadingMember) return <div>Loading...</div>;
+  if (isEditing && isLoadingMember) return <div>Laddar...</div>;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Family Member" : "Add New Family Member"}</CardTitle>
+        <CardTitle>{isEditing ? "Redigera familjemedlem" : "Lägg till ny familjemedlem"}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -96,7 +94,7 @@ const AddEditMember = () => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Namn</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -109,9 +107,9 @@ const AddEditMember = () => {
               name="birthDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Birth Date</FormLabel>
+                  <FormLabel>Födelsedatum</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="YYYY-MM-DD" />
+                    <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,7 +120,7 @@ const AddEditMember = () => {
               name="birthPlace"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Birth Place</FormLabel>
+                  <FormLabel>Födelseort</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -135,9 +133,9 @@ const AddEditMember = () => {
               name="deathDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Death Date (if applicable)</FormLabel>
+                  <FormLabel>Dödsdatum (om tillämpligt)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="YYYY-MM-DD" />
+                    <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -148,7 +146,7 @@ const AddEditMember = () => {
               name="deathPlace"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Death Place (if applicable)</FormLabel>
+                  <FormLabel>Dödsort (om tillämpligt)</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -161,17 +159,17 @@ const AddEditMember = () => {
               name="bio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bio</FormLabel>
+                  <FormLabel>Biografi</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
-                  <FormDescription>Brief biography (max 500 characters)</FormDescription>
+                  <FormDescription>Kort biografi (max 500 tecken)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Member"}
+              {isSubmitting ? "Sparar..." : "Spara medlem"}
             </Button>
           </form>
         </Form>
