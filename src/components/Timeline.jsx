@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const fetchTimelineEvents = async () => {
   // Simulated API response
   return [
-    { id: 1, date: "1980-01-01", event: "John Doe born", type: "birth" },
-    { id: 2, date: "1982-03-15", event: "Mary Smith born", type: "birth" },
-    { id: 3, date: "2005-06-15", event: "John Doe and Jane Smith married", type: "marriage" },
-    { id: 4, date: "2010-05-15", event: "Jane Doe born", type: "birth" },
-    { id: 5, date: "2020-09-01", event: "Family moved to New York", type: "event" },
+    { id: 1, date: "1980-01-01", event: "John Doe född", type: "birth" },
+    { id: 2, date: "1982-03-15", event: "Jane Smith född", type: "birth" },
+    { id: 3, date: "2005-06-15", event: "John Doe och Jane Smith gifter sig", type: "marriage" },
+    { id: 4, date: "2010-05-15", event: "Jack Doe född", type: "birth" },
+    { id: 5, date: "2012-09-20", event: "Jill Doe född", type: "birth" },
+    { id: 6, date: "2020-09-01", event: "Familjen flyttar till Stockholm", type: "event" },
   ];
 };
 
@@ -19,13 +20,13 @@ const Timeline = () => {
     queryFn: fetchTimelineEvents,
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) return <div>Laddar...</div>;
+  if (error) return <div>Fel: {error.message}</div>;
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle>Family Timeline</CardTitle>
+        <CardTitle>Familjetidslinje</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">

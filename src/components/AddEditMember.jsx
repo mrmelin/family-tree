@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,14 +9,17 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const memberSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Use YYYY-MM-DD format." }),
-  birthPlace: z.string().min(2, { message: "Birth place must be at least 2 characters." }),
-  deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Use YYYY-MM-DD format." }).optional().or(z.literal('')),
-  deathPlace: z.string().min(2, { message: "Death place must be at least 2 characters." }).optional(),
-  bio: z.string().max(500, { message: "Bio must not exceed 500 characters." }).optional(),
+  name: z.string().min(2, { message: "Namnet måste vara minst 2 tecken." }),
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }),
+  birthPlace: z.string().min(2, { message: "Födelseorten måste vara minst 2 tecken." }),
+  deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
+  deathPlace: z.string().min(2, { message: "Dödsorten måste vara minst 2 tecken." }).optional(),
+  bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
+  fatherId: z.string().optional(),
+  motherId: z.string().optional(),
 });
 
 // Mock API calls - replace with actual API calls
@@ -26,21 +29,34 @@ const fetchMember = async (id) => {
     id,
     name: "John Doe",
     birthDate: "1980-01-01",
-    birthPlace: "New York, USA",
+    birthPlace: "Stockholm, Sverige",
     deathDate: "",
     deathPlace: "",
-    bio: "John is a family historian.",
+    bio: "John är en familjehistoriker.",
+    fatherId: "father-id",
+    motherId: "mother-id",
   };
+};
+
+const fetchAllMembers = async () => {
+  // Simulated API call to fetch all members
+  return [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Doe" },
+    // ... more members
+  ];
 };
 
 const saveMember = async (data) => {
   // Simulated API call to save member
-  console.log("Saving member:", data);
+  console.log("Sparar medlem:", data);
   return { id: "new-id", ...data };
 };
 
 const AddEditMember = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isEditing = !!id;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,23 +66,39 @@ const AddEditMember = () => {
     enabled: isEditing,
   });
 
+  const { data: allMembers = [] } = useQuery({
+    queryKey: ['allMembers'],
+    queryFn: fetchAllMembers,
+  });
+
   const form = useForm({
     resolver: zodResolver(memberSchema),
-    defaultValues: isEditing ? existingMember : {
+    defaultValues: {
       name: "",
       birthDate: "",
       birthPlace: "",
       deathDate: "",
       deathPlace: "",
       bio: "",
+      fatherId: "",
+      motherId: "",
     },
   });
+
+  useEffect(() => {
+    if (isEditing && existingMember) {
+      form.reset(existingMember);
+    }
+  }, [isEditing, existingMember, form]);
 
   const mutation = useMutation({
     mutationFn: saveMember,
     onSuccess: () => {
       console.log("Medlem sparad framgångsrikt");
       setIsSubmitting(false);
+      queryClient.invalidateQueries(['allMembers']);
+      queryClient.invalidateQueries(['familyTree']);
+      navigate('/');
     },
     onError: (error) => {
       console.error("Fel vid sparande av medlem:", error);
@@ -164,6 +196,50 @@ const AddEditMember = () => {
                     <Textarea {...field} />
                   </FormControl>
                   <FormDescription>Kort biografi (max 500 tecken)</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fatherId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Far</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj far" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {allMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="motherId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mor</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj mor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {allMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
