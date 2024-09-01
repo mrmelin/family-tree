@@ -14,13 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
   lastName: z.string().optional(),
-  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional(),
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   birthPlace: z.string().optional(),
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   deathPlace: z.string().optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
-  fatherId: z.string().optional(),
-  motherId: z.string().optional(),
+  fatherId: z.string(),
+  motherId: z.string(),
 });
 
 // Mock API calls - replace with actual API calls
@@ -86,7 +86,13 @@ const AddEditMember = () => {
 
   const { data: allMembers = [] } = useQuery({
     queryKey: ['allMembers'],
-    queryFn: () => JSON.parse(localStorage.getItem('familyMembers') || '[]'),
+    queryFn: () => {
+      const members = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+      return members.map(member => ({
+        id: member.id,
+        name: `${member.firstName} ${member.lastName || ''}`.trim()
+      }));
+    },
   });
 
   const form = useForm({
@@ -241,13 +247,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">Ingen far</SelectItem>
                       {allMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                       ))}
@@ -263,13 +270,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">Ingen mor</SelectItem>
                       {allMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                       ))}

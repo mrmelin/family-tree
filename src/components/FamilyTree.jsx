@@ -36,17 +36,17 @@ const fetchFamilyTree = async () => {
 };
 
 const FamilyMember = ({ member }) => (
-  <Card className="w-48 m-2">
-    <CardHeader>
-      <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
-      <Link to={`/edit-member/${member.id}`}>
-        <Button variant="link" size="sm" className="p-0">Redigera</Button>
-      </Link>
-    </CardContent>
-  </Card>
+  <Link to={`/edit-member/${member.id}`}>
+    <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
+      <CardHeader>
+        <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
+        <p className="text-xs text-blue-500 mt-2">Klicka för att redigera</p>
+      </CardContent>
+    </Card>
+  </Link>
 );
 
 const FamilyTree = () => {
