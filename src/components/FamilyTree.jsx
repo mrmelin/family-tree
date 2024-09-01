@@ -22,22 +22,7 @@ const fetchFamilyTree = async () => {
   return JSON.parse(storedMembers);
 };
 
-const buildFamilyTree = (members) => {
-  const memberMap = new Map(members.map(m => [m.id, { ...m, children: [] }]));
-  const rootMembers = [];
-
-  memberMap.forEach(member => {
-    if (member.fatherId && memberMap.has(member.fatherId)) {
-      memberMap.get(member.fatherId).children.push(member);
-    } else if (member.motherId && memberMap.has(member.motherId)) {
-      memberMap.get(member.motherId).children.push(member);
-    } else {
-      rootMembers.push(member);
-    }
-  });
-
-  return rootMembers;
-};
+// First occurrence of buildFamilyTree removed
 
 const FamilyMember = ({ member }) => (
   <Link to={`/edit-member/${member.id}`}>
