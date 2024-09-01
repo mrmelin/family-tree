@@ -19,8 +19,8 @@ const memberSchema = z.object({
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   deathPlace: z.string().optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
-  fatherId: z.string(),
-  motherId: z.string(),
+  fatherId: z.string().optional(),
+  motherId: z.string().optional(),
 });
 
 // Mock API calls - replace with actual API calls
@@ -247,14 +247,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || "no_father"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen far</SelectItem>
+                      <SelectItem value="no_father">Ingen far</SelectItem>
                       {allMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                       ))}
@@ -270,14 +270,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || "no_mother"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen mor</SelectItem>
+                      <SelectItem value="no_mother">Ingen mor</SelectItem>
                       {allMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                       ))}
