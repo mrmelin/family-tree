@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zoom, ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 // Mock API call - replace with actual API call
 const fetchFamilyTree = async () => {
@@ -75,7 +75,7 @@ const FamilyTree = () => {
           <ZoomOut className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="icon" onClick={() => setZoom(100)}>
-          <Zoom className="h-4 w-4" />
+          <Maximize2 className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="icon" onClick={() => setZoom(zoom + 10)}>
           <ZoomIn className="h-4 w-4" />
