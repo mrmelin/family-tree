@@ -13,14 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
-  lastName: z.string().min(2, { message: "Efternamnet måste vara minst 2 tecken." }),
+  lastName: z.string().optional(),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional(),
-  birthPlace: z.string().min(2, { message: "Födelseorten måste vara minst 2 tecken." }).optional(),
+  birthPlace: z.string().optional(),
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
-  deathPlace: z.string().min(2, { message: "Dödsorten måste vara minst 2 tecken." }).optional(),
+  deathPlace: z.string().optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
-  fatherId: z.string(),
-  motherId: z.string(),
+  fatherId: z.string().optional(),
+  motherId: z.string().optional(),
 });
 
 // Mock API calls - replace with actual API calls
@@ -49,15 +49,23 @@ const fetchAllMembers = async () => {
 };
 
 const saveMember = async (data) => {
-  // In a real application, this would be an API call
   const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
-  const newMember = {
-    id: Date.now().toString(), // Generate a unique ID
-    ...data
-  };
-  const updatedMembers = [...storedMembers, newMember];
+  let updatedMembers;
+  if (data.id) {
+    // If the member has an ID, it's an edit operation
+    updatedMembers = storedMembers.map(member => 
+      member.id === data.id ? { ...member, ...data } : member
+    );
+  } else {
+    // If no ID, it's a new member
+    const newMember = {
+      id: Date.now().toString(),
+      ...data
+    };
+    updatedMembers = [...storedMembers, newMember];
+  }
   localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
-  return newMember;
+  return data.id ? data : updatedMembers[updatedMembers.length - 1];
 };
 
 const AddEditMember = () => {
@@ -69,13 +77,16 @@ const AddEditMember = () => {
 
   const { data: existingMember, isLoading: isLoadingMember } = useQuery({
     queryKey: ['member', id],
-    queryFn: () => fetchMember(id),
+    queryFn: () => {
+      const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+      return storedMembers.find(member => member.id === id) || null;
+    },
     enabled: isEditing,
   });
 
   const { data: allMembers = [] } = useQuery({
     queryKey: ['allMembers'],
-    queryFn: fetchAllMembers,
+    queryFn: () => JSON.parse(localStorage.getItem('familyMembers') || '[]'),
   });
 
   const form = useForm({
@@ -116,6 +127,9 @@ const AddEditMember = () => {
 
   const onSubmit = (data) => {
     setIsSubmitting(true);
+    if (isEditing) {
+      data.id = id;
+    }
     mutation.mutate(data);
   };
 

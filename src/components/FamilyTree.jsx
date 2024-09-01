@@ -38,12 +38,12 @@ const fetchFamilyTree = async () => {
 const FamilyMember = ({ member }) => (
   <Card className="w-48 m-2">
     <CardHeader>
-      <CardTitle className="text-sm">{`${member.firstName} ${member.lastName}`}</CardTitle>
+      <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
     </CardHeader>
     <CardContent>
       {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
-      <Link to={`/member/${member.id}`}>
-        <Button variant="link" size="sm" className="p-0">Visa detaljer</Button>
+      <Link to={`/edit-member/${member.id}`}>
+        <Button variant="link" size="sm" className="p-0">Redigera</Button>
       </Link>
     </CardContent>
   </Card>
