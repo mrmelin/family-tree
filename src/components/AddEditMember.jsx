@@ -12,14 +12,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const memberSchema = z.object({
-  name: z.string().min(2, { message: "Namnet måste vara minst 2 tecken." }),
-  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }),
-  birthPlace: z.string().min(2, { message: "Födelseorten måste vara minst 2 tecken." }),
+  firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
+  lastName: z.string().min(2, { message: "Efternamnet måste vara minst 2 tecken." }),
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional(),
+  birthPlace: z.string().min(2, { message: "Födelseorten måste vara minst 2 tecken." }).optional(),
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   deathPlace: z.string().min(2, { message: "Dödsorten måste vara minst 2 tecken." }).optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
-  fatherId: z.string().optional(),
-  motherId: z.string().optional(),
+  fatherId: z.string(),
+  motherId: z.string(),
 });
 
 // Mock API calls - replace with actual API calls
@@ -48,9 +49,15 @@ const fetchAllMembers = async () => {
 };
 
 const saveMember = async (data) => {
-  // Simulated API call to save member
-  console.log("Sparar medlem:", data);
-  return { id: "new-id", ...data };
+  // In a real application, this would be an API call
+  const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+  const newMember = {
+    id: Date.now().toString(), // Generate a unique ID
+    ...data
+  };
+  const updatedMembers = [...storedMembers, newMember];
+  localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
+  return newMember;
 };
 
 const AddEditMember = () => {
@@ -74,7 +81,8 @@ const AddEditMember = () => {
   const form = useForm({
     resolver: zodResolver(memberSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       birthDate: "",
       birthPlace: "",
       deathDate: "",
@@ -123,10 +131,23 @@ const AddEditMember = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Namn</FormLabel>
+                  <FormLabel>Förnamn</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Efternamn</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -139,7 +160,7 @@ const AddEditMember = () => {
               name="birthDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Födelsedatum</FormLabel>
+                  <FormLabel>Födelsedatum (valfritt)</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
                   </FormControl>

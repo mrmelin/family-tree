@@ -7,46 +7,41 @@ import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 // Mock API call - replace with actual API call
 const fetchFamilyTree = async () => {
-  // Simulated API response
-  return [
+  // This should be replaced with an actual API call in a real application
+  const storedMembers = localStorage.getItem('familyMembers');
+  if (storedMembers) {
+    return JSON.parse(storedMembers);
+  }
+  // Default data if no stored members
+  const defaultMembers = [
     {
       id: "1",
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       birthDate: "1980-01-01",
       fatherId: null,
       motherId: null,
     },
     {
       id: "2",
-      name: "Jane Doe",
+      firstName: "Jane",
+      lastName: "Doe",
       birthDate: "1982-03-15",
       fatherId: null,
       motherId: null,
     },
-    {
-      id: "3",
-      name: "Jack Doe",
-      birthDate: "2010-05-15",
-      fatherId: "1",
-      motherId: "2",
-    },
-    {
-      id: "4",
-      name: "Jill Doe",
-      birthDate: "2012-09-20",
-      fatherId: "1",
-      motherId: "2",
-    },
   ];
+  localStorage.setItem('familyMembers', JSON.stringify(defaultMembers));
+  return defaultMembers;
 };
 
 const FamilyMember = ({ member }) => (
   <Card className="w-48 m-2">
     <CardHeader>
-      <CardTitle className="text-sm">{member.name}</CardTitle>
+      <CardTitle className="text-sm">{`${member.firstName} ${member.lastName}`}</CardTitle>
     </CardHeader>
     <CardContent>
-      <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>
+      {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
       <Link to={`/member/${member.id}`}>
         <Button variant="link" size="sm" className="p-0">Visa detaljer</Button>
       </Link>

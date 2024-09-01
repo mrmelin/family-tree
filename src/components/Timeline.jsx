@@ -3,15 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Mock API call - replace with actual API call
 const fetchTimelineEvents = async () => {
-  // Simulated API response
-  return [
-    { id: 1, date: "1980-01-01", event: "John Doe född", type: "birth" },
-    { id: 2, date: "1982-03-15", event: "Jane Smith född", type: "birth" },
-    { id: 3, date: "2005-06-15", event: "John Doe och Jane Smith gifter sig", type: "marriage" },
-    { id: 4, date: "2010-05-15", event: "Jack Doe född", type: "birth" },
-    { id: 5, date: "2012-09-20", event: "Jill Doe född", type: "birth" },
-    { id: 6, date: "2020-09-01", event: "Familjen flyttar till Stockholm", type: "event" },
-  ];
+  const familyMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+  return familyMembers
+    .filter(member => member.birthDate) // Only include members with a birth date
+    .map(member => ({
+      id: member.id,
+      date: member.birthDate,
+      event: `${member.firstName} ${member.lastName} född`,
+      type: "birth"
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
 const Timeline = () => {
