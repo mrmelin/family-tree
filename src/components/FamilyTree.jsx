@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
-// Mock API call - replace with actual API call
+// Fetch family members from local storage or initialize with default members
 const fetchFamilyTree = async () => {
   let storedMembers = localStorage.getItem('familyMembers');
   if (!storedMembers) {
@@ -53,6 +53,34 @@ const FamilyMember = ({ member }) => (
   </Link>
 );
 
+const renderFamilyTree = (node, members) => (
+  <div key={node.id} className="flex flex-col items-center">
+    <FamilyMember member={node} />
+    {node.children && node.children.length > 0 && (
+      <div className="flex">
+        {node.children.map(childId => renderFamilyTree(members.find(m => m.id === childId), members))}
+      </div>
+    )}
+  </div>
+);
+
+const buildFamilyTree = (members) => {
+  const memberMap = new Map(members.map(m => [m.id, { ...m, children: [] }]));
+  const rootMembers = [];
+
+  members.forEach(member => {
+    if (member.fatherId && memberMap.has(member.fatherId)) {
+      memberMap.get(member.fatherId).children.push(member.id);
+    } else if (member.motherId && memberMap.has(member.motherId)) {
+      memberMap.get(member.motherId).children.push(member.id);
+    } else {
+      rootMembers.push(member.id);
+    }
+  });
+
+  return { rootMembers, memberMap };
+};
+
 const FamilyTree = () => {
   const [zoom, setZoom] = useState(100);
   const { data: familyMembers, isLoading, error } = useQuery({
@@ -63,51 +91,28 @@ const FamilyTree = () => {
   if (isLoading) return <div>Laddar...</div>;
   if (error) return <div>Fel: {error.message}</div>;
 
-  const buildFamilyTree = (members) => {
-    const memberMap = new Map(members.map(m => [m.id, { ...m, children: [] }]));
-    const rootMembers = [];
-
-    memberMap.forEach(member => {
-      if (member.fatherId && memberMap.has(member.fatherId)) {
-        memberMap.get(member.fatherId).children.push(member);
-      } else if (member.motherId && memberMap.has(member.motherId)) {
-        memberMap.get(member.motherId).children.push(member);
-      } else {
-        rootMembers.push(member);
-      }
-    });
-
-    return rootMembers;
-  };
-
-  const renderFamilyTree = (node) => (
-    <div key={node.id} className="flex flex-col items-center">
-      <FamilyMember member={node} />
-      {node.children && node.children.length > 0 && (
-        <div className="flex">
-          {node.children.map(child => renderFamilyTree(child))}
-        </div>
-      )}
-    </div>
-  );
-
-  const familyTree = buildFamilyTree(familyMembers);
+  const { rootMembers, memberMap } = buildFamilyTree(familyMembers);
 
   return (
     <div className="relative">
-      <div className="mb-4 flex justify-end space-x-2">
-        <Button variant="outline" size="icon" onClick={() => setZoom(zoom - 10)} aria-label="Zooma ut">
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={() => setZoom(100)} aria-label="Återställ zoom">
-          <Maximize2 className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={() => setZoom(zoom + 10)} aria-label="Zooma in">
-          <ZoomIn className="h-4 w-4" />
-        </Button>
+      <div className="mb-4 flex justify-between items-center">
+        <Link to="/add-member">
+          <Button variant="outline">Lägg till ny medlem</Button>
+        </Link>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="icon" onClick={() => setZoom(zoom - 10)} aria-label="Zooma ut">
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => setZoom(100)} aria-label="Återställ zoom">
+            <Maximize2 className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => setZoom(zoom + 10)} aria-label="Zooma in">
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }} className="transition-transform duration-300">
-        {familyTree.map(rootMember => renderFamilyTree(rootMember))}
+        {rootMembers.map(rootMemberId => renderFamilyTree(memberMap.get(rootMemberId), familyMembers))}
       </div>
     </div>
   );
