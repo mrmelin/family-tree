@@ -70,21 +70,6 @@ const saveMember = async (data) => {
   return data.id ? data : updatedMembers[updatedMembers.length - 1];
 };
 
-const mutation = useMutation({
-  mutationFn: saveMember,
-  onSuccess: () => {
-    console.log("Medlem sparad framgångsrikt");
-    setIsSubmitting(false);
-    queryClient.invalidateQueries(['allMembers']);
-    queryClient.invalidateQueries(['familyTree']);
-    navigate('/');
-  },
-  onError: (error) => {
-    console.error("Fel vid sparande av medlem:", error);
-    setIsSubmitting(false);
-  },
-});
-
 const AddEditMember = () => {
   const { id } = useParams();
   const navigate = useNavigate();
