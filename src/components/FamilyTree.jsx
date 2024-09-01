@@ -7,32 +7,36 @@ import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 // Mock API call - replace with actual API call
 const fetchFamilyTree = async () => {
-  // This should be replaced with an actual API call in a real application
-  const storedMembers = localStorage.getItem('familyMembers');
-  if (storedMembers) {
-    return JSON.parse(storedMembers);
+  let storedMembers = localStorage.getItem('familyMembers');
+  if (!storedMembers) {
+    const defaultMembers = [
+      { id: "1", firstName: "Birgitta", lastName: "Melin", birthDate: "1963-01-01", fatherId: null, motherId: null },
+      { id: "2", firstName: "Peter", lastName: "Melin", birthDate: "1961-01-01", fatherId: null, motherId: null },
+      { id: "3", firstName: "Ola", lastName: "Melin", birthDate: "1987-01-01", fatherId: "2", motherId: "1" },
+      { id: "4", firstName: "Elin", lastName: "Melin", birthDate: "1989-01-01", fatherId: "2", motherId: "1" },
+      { id: "5", firstName: "Filip", lastName: "Melin", birthDate: "1991-01-01", fatherId: "2", motherId: "1" },
+    ];
+    localStorage.setItem('familyMembers', JSON.stringify(defaultMembers));
+    storedMembers = JSON.stringify(defaultMembers);
   }
-  // Default data if no stored members
-  const defaultMembers = [
-    {
-      id: "1",
-      firstName: "John",
-      lastName: "Doe",
-      birthDate: "1980-01-01",
-      fatherId: null,
-      motherId: null,
-    },
-    {
-      id: "2",
-      firstName: "Jane",
-      lastName: "Doe",
-      birthDate: "1982-03-15",
-      fatherId: null,
-      motherId: null,
-    },
-  ];
-  localStorage.setItem('familyMembers', JSON.stringify(defaultMembers));
-  return defaultMembers;
+  return JSON.parse(storedMembers);
+};
+
+const buildFamilyTree = (members) => {
+  const memberMap = new Map(members.map(m => [m.id, { ...m, children: [] }]));
+  const rootMembers = [];
+
+  memberMap.forEach(member => {
+    if (member.fatherId && memberMap.has(member.fatherId)) {
+      memberMap.get(member.fatherId).children.push(member);
+    } else if (member.motherId && memberMap.has(member.motherId)) {
+      memberMap.get(member.motherId).children.push(member);
+    } else {
+      rootMembers.push(member);
+    }
+  });
+
+  return rootMembers;
 };
 
 const FamilyMember = ({ member }) => (

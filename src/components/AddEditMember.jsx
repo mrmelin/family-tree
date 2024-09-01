@@ -60,7 +60,9 @@ const saveMember = async (data) => {
     // If no ID, it's a new member
     const newMember = {
       id: Date.now().toString(),
-      ...data
+      ...data,
+      fatherId: data.fatherId === "no_father" ? null : data.fatherId,
+      motherId: data.motherId === "no_mother" ? null : data.motherId
     };
     updatedMembers = [...storedMembers, newMember];
   }
