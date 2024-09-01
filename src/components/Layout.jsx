@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Menu, Search, User, X } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const Layout = ({ children }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -15,12 +16,12 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const NavLinks = () => (
+  const NavLinks = ({ onLinkClick }) => (
     <nav className="space-y-2">
-      <Link to="/" className="block py-2 px-4 rounded hover:bg-accent">Släktträd</Link>
-      <Link to="/add-member" className="block py-2 px-4 rounded hover:bg-accent">Lägg till medlem</Link>
-      <Link to="/timeline" className="block py-2 px-4 rounded hover:bg-accent">Tidslinje</Link>
-      <Link to="/gallery" className="block py-2 px-4 rounded hover:bg-accent">Mediagalleri</Link>
+      <Link to="/" className="block py-2 px-4 rounded hover:bg-accent" onClick={onLinkClick}>Släktträd</Link>
+      <Link to="/add-member" className="block py-2 px-4 rounded hover:bg-accent" onClick={onLinkClick}>Lägg till medlem</Link>
+      <Link to="/timeline" className="block py-2 px-4 rounded hover:bg-accent" onClick={onLinkClick}>Tidslinje</Link>
+      <Link to="/gallery" className="block py-2 px-4 rounded hover:bg-accent" onClick={onLinkClick}>Mediagalleri</Link>
     </nav>
   );
 
@@ -37,7 +38,7 @@ const Layout = ({ children }) => {
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
               {isMobile && (
-                <Sheet>
+                <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="icon" className="mr-2">
                       <Menu className="h-5 w-5" />
@@ -45,13 +46,13 @@ const Layout = ({ children }) => {
                   </SheetTrigger>
                   <SheetContent side="left" className="w-64 p-0">
                     <div className="flex justify-end p-4">
-                      <Sheet.Close asChild>
+                      <SheetClose asChild>
                         <Button variant="ghost" size="icon">
                           <X className="h-5 w-5" />
                         </Button>
-                      </Sheet.Close>
+                      </SheetClose>
                     </div>
-                    <NavLinks />
+                    <NavLinks onLinkClick={() => setIsMenuOpen(false)} />
                   </SheetContent>
                 </Sheet>
               )}
