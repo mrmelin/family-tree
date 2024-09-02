@@ -10,64 +10,38 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { db } from "@/lib/firebase";
+import { ref, set, get } from "firebase/database";
 
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
   lastName: z.string().optional(),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   birthPlace: z.string().optional(),
+  isDeceased: z.boolean().default(false),
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   deathPlace: z.string().optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
   fatherId: z.string().optional(),
   motherId: z.string().optional(),
+  childrenIds: z.array(z.string()).optional(),
 });
 
-// Mock API calls - replace with actual API calls
 const fetchMember = async (id) => {
-  // Simulated API response for editing
-  return {
-    id,
-    name: "John Doe",
-    birthDate: "1980-01-01",
-    birthPlace: "Stockholm, Sverige",
-    deathDate: "",
-    deathPlace: "",
-    bio: "John är en familjehistoriker.",
-    fatherId: "father-id",
-    motherId: "mother-id",
-  };
+  const snapshot = await get(ref(db, `members/${id}`));
+  return snapshot.val();
 };
 
 const fetchAllMembers = async () => {
-  // Simulated API call to fetch all members
-  return [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Jane Doe" },
-    // ... more members
-  ];
+  const snapshot = await get(ref(db, 'members'));
+  return snapshot.val() || {};
 };
 
 const saveMember = async (data) => {
-  const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
-  let updatedMembers;
-  if (data.id) {
-    // If the member has an ID, it's an edit operation
-    updatedMembers = storedMembers.map(member => 
-      member.id === data.id ? { ...member, ...data } : member
-    );
-  } else {
-    // If no ID, it's a new member
-    const newMember = {
-      id: Date.now().toString(),
-      ...data,
-      fatherId: data.fatherId === "no_father" ? null : data.fatherId,
-      motherId: data.motherId === "no_mother" ? null : data.motherId
-    };
-    updatedMembers = [...storedMembers, newMember];
-  }
-  localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
-  return data.id ? data : updatedMembers[updatedMembers.length - 1];
+  const memberId = data.id || Date.now().toString();
+  await set(ref(db, `members/${memberId}`), { ...data, id: memberId });
+  return { ...data, id: memberId };
 };
 
 const AddEditMember = () => {
@@ -79,22 +53,13 @@ const AddEditMember = () => {
 
   const { data: existingMember, isLoading: isLoadingMember } = useQuery({
     queryKey: ['member', id],
-    queryFn: () => {
-      const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
-      return storedMembers.find(member => member.id === id) || null;
-    },
+    queryFn: () => fetchMember(id),
     enabled: isEditing,
   });
 
-  const { data: allMembers = [] } = useQuery({
+  const { data: allMembers = {} } = useQuery({
     queryKey: ['allMembers'],
-    queryFn: () => {
-      const members = JSON.parse(localStorage.getItem('familyMembers') || '[]');
-      return members.map(member => ({
-        id: member.id,
-        name: `${member.firstName} ${member.lastName || ''}`.trim()
-      }));
-    },
+    queryFn: fetchAllMembers,
   });
 
   const form = useForm({
@@ -104,11 +69,13 @@ const AddEditMember = () => {
       lastName: "",
       birthDate: "",
       birthPlace: "",
+      isDeceased: false,
       deathDate: "",
       deathPlace: "",
       bio: "",
       fatherId: "",
       motherId: "",
+      childrenIds: [],
     },
   });
 
@@ -121,7 +88,6 @@ const AddEditMember = () => {
   const mutation = useMutation({
     mutationFn: saveMember,
     onSuccess: () => {
-      console.log("Medlem sparad framgångsrikt");
       setIsSubmitting(false);
       queryClient.invalidateQueries(['allMembers']);
       queryClient.invalidateQueries(['familyTree']);
@@ -205,30 +171,53 @@ const AddEditMember = () => {
             />
             <FormField
               control={form.control}
-              name="deathDate"
+              name="isDeceased"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dödsdatum (om tillämpligt)</FormLabel>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Den här personen är avliden
+                    </FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="deathPlace"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dödsort (om tillämpligt)</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {form.watch("isDeceased") && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="deathDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dödsdatum</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="deathPlace"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dödsort</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <FormField
               control={form.control}
               name="bio"
@@ -249,16 +238,16 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "no_father"}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="no_father">Ingen far</SelectItem>
-                      {allMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                      <SelectItem value="">Ingen far</SelectItem>
+                      {Object.values(allMembers).map((member) => (
+                        <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -272,19 +261,63 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "no_mother"}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="no_mother">Ingen mor</SelectItem>
-                      {allMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                      <SelectItem value="">Ingen mor</SelectItem>
+                      {Object.values(allMembers).map((member) => (
+                        <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="childrenIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Barn</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => field.onChange([...field.value, value])}
+                      value=""
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Lägg till barn" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(allMembers)
+                          .filter((member) => !field.value.includes(member.id))
+                          .map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {`${member.firstName} ${member.lastName}`}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <div className="mt-2">
+                    {field.value.map((childId) => (
+                      <div key={childId} className="flex items-center space-x-2 mt-1">
+                        <span>{`${allMembers[childId]?.firstName} ${allMembers[childId]?.lastName}`}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => field.onChange(field.value.filter((id) => id !== childId))}
+                        >
+                          Ta bort
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
