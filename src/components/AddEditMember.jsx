@@ -242,14 +242,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || "none"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen far</SelectItem>
+                      <SelectItem value="none">Ingen far</SelectItem>
                       {sortedMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
@@ -267,14 +267,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || "none"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen mor</SelectItem>
+                      <SelectItem value="none">Ingen mor</SelectItem>
                       {sortedMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
@@ -294,13 +294,18 @@ const AddEditMember = () => {
                   <FormLabel>Barn</FormLabel>
                   <FormControl>
                     <Select
-                      onValueChange={(value) => field.onChange([...field.value, value])}
-                      value=""
+                      onValueChange={(value) => {
+                        if (value !== "none") {
+                          field.onChange([...field.value, value]);
+                        }
+                      }}
+                      value="none"
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Lägg till barn" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">Välj barn</SelectItem>
                         {sortedMembers
                           .filter((member) => !field.value.includes(member.id))
                           .map((member) => (
