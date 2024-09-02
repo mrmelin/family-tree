@@ -73,8 +73,8 @@ const AddEditMember = () => {
       deathDate: "",
       deathPlace: "",
       bio: "",
-      fatherId: "",
-      motherId: "",
+      fatherId: "none",
+      motherId: "none",
       childrenIds: [],
     },
   });
@@ -238,14 +238,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen far</SelectItem>
+                      <SelectItem value="none">Ingen far</SelectItem>
                       {Object.values(allMembers).map((member) => (
                         <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
                       ))}
@@ -261,14 +261,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen mor</SelectItem>
+                      <SelectItem value="none">Ingen mor</SelectItem>
                       {Object.values(allMembers).map((member) => (
                         <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
                       ))}
