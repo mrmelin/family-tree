@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,19 @@ import { db } from "@/lib/firebase";
 import { ref, get } from "firebase/database";
 
 const fetchFamilyMembers = async () => {
-  const snapshot = await get(ref(db, 'members'));
-  return snapshot.val() || {};
+  try {
+    console.log("Fetching family members...");
+    const snapshot = await get(ref(db, 'members'));
+    console.log("Fetch completed. Data:", snapshot.val());
+    return snapshot.val() || {};
+  } catch (error) {
+    console.error("Error fetching family members:", error);
+    throw error;
+  }
 };
 
 const buildFamilyTree = (members) => {
+  console.log("Building family tree with members:", members);
   const memberMap = new Map(Object.entries(members).map(([id, member]) => [id, { ...member, children: [] }]));
   const rootMembers = [];
 
@@ -26,6 +34,7 @@ const buildFamilyTree = (members) => {
     }
   });
 
+  console.log("Root members:", rootMembers);
   return rootMembers;
 };
 
@@ -64,6 +73,10 @@ const FamilyTree = () => {
     queryKey: ['familyTree'],
     queryFn: fetchFamilyMembers,
   });
+
+  useEffect(() => {
+    console.log("FamilyTree component rendered. isLoading:", isLoading, "error:", error, "familyMembers:", familyMembers);
+  }, [isLoading, error, familyMembers]);
 
   if (isLoading) return <div>Laddar...</div>;
   if (error) return <div>Fel: {error.message}</div>;
