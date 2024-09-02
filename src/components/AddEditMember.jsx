@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -73,8 +73,8 @@ const AddEditMember = () => {
       deathDate: "",
       deathPlace: "",
       bio: "",
-      fatherId: "none",
-      motherId: "none",
+      fatherId: "",
+      motherId: "",
       childrenIds: [],
     },
   });
@@ -108,6 +108,10 @@ const AddEditMember = () => {
   };
 
   if (isEditing && isLoadingMember) return <div>Laddar...</div>;
+
+  const sortedMembers = Object.values(allMembers).sort((a, b) => {
+    return new Date(a.birthDate || '9999-12-31') - new Date(b.birthDate || '9999-12-31');
+  });
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -245,9 +249,11 @@ const AddEditMember = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen far</SelectItem>
-                      {Object.values(allMembers).map((member) => (
-                        <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
+                      <SelectItem value="">Ingen far</SelectItem>
+                      {sortedMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -268,9 +274,11 @@ const AddEditMember = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen mor</SelectItem>
-                      {Object.values(allMembers).map((member) => (
-                        <SelectItem key={member.id} value={member.id}>{`${member.firstName} ${member.lastName}`}</SelectItem>
+                      <SelectItem value="">Ingen mor</SelectItem>
+                      {sortedMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -293,11 +301,11 @@ const AddEditMember = () => {
                         <SelectValue placeholder="Lägg till barn" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.values(allMembers)
+                        {sortedMembers
                           .filter((member) => !field.value.includes(member.id))
                           .map((member) => (
                             <SelectItem key={member.id} value={member.id}>
-                              {`${member.firstName} ${member.lastName}`}
+                              {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
                             </SelectItem>
                           ))}
                       </SelectContent>
@@ -306,7 +314,7 @@ const AddEditMember = () => {
                   <div className="mt-2">
                     {field.value.map((childId) => (
                       <div key={childId} className="flex items-center space-x-2 mt-1">
-                        <span>{`${allMembers[childId]?.firstName} ${allMembers[childId]?.lastName}`}</span>
+                        <span>{`${allMembers[childId]?.firstName} ${allMembers[childId]?.lastName} (${allMembers[childId]?.birthDate || 'Okänt datum'})`}</span>
                         <Button
                           type="button"
                           variant="ghost"
