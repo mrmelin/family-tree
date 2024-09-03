@@ -21,8 +21,8 @@ const buildFamilyTree = (members) => {
   return rootMembers;
 };
 
-const FamilyMember = ({ member, level = 0 }) => {
-  const spouse = member.spouseId ? familyMembers.find(m => m.id === member.spouseId) : null;
+const FamilyMember = ({ member, allMembers }) => {
+  const spouse = member.spouseId ? allMembers.find(m => m.id === member.spouseId) : null;
 
   return (
     <div className="relative">
@@ -64,7 +64,7 @@ const FamilyMember = ({ member, level = 0 }) => {
             {member.children.map((child, index) => (
               <div key={child.id} className="relative">
                 {index > 0 && <div className="absolute top-0 left-0 w-full h-px bg-gray-300" style={{ top: '-1rem' }}></div>}
-                <FamilyMember member={child} level={level + 1} />
+                <FamilyMember member={child} allMembers={allMembers} />
               </div>
             ))}
           </div>
@@ -101,7 +101,7 @@ const FamilyTree = () => {
       <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }} className="transition-transform duration-300 flex justify-center">
         <div className="flex flex-col items-center">
           {familyTree.map(rootMember => (
-            <FamilyMember key={rootMember.id} member={rootMember} />
+            <FamilyMember key={rootMember.id} member={rootMember} allMembers={familyMembers} />
           ))}
         </div>
       </div>

@@ -82,19 +82,11 @@ const AddEditMember = () => {
   };
 
   const getPotentialParents = (gender) => {
-    const memberBirthDate = form.getValues('birthDate');
-    return allMembers.filter(member => 
-      member.gender === gender &&
-      (!memberBirthDate || new Date(member.birthDate) < new Date(memberBirthDate))
-    );
+    return allMembers.filter(member => member.gender === gender);
   };
 
   const getPotentialSpouses = () => {
-    const memberBirthDate = form.getValues('birthDate');
-    return allMembers.filter(member => 
-      member.id !== id && // Exclude self
-      (!memberBirthDate || Math.abs(new Date(member.birthDate) - new Date(memberBirthDate)) < 365.25 * 50 * 24 * 60 * 60 * 1000) // Within 50 years
-    );
+    return allMembers.filter(member => member.id !== id);
   };
 
   return (
@@ -247,17 +239,17 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "none"}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen far</SelectItem>
+                      <SelectItem value="">Ingen far</SelectItem>
                       {getPotentialParents("male").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
-                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                          {`${member.firstName} ${member.lastName}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -272,17 +264,17 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "none"}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen mor</SelectItem>
+                      <SelectItem value="">Ingen mor</SelectItem>
                       {getPotentialParents("female").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
-                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                          {`${member.firstName} ${member.lastName}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -297,17 +289,17 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Make/Maka</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "none"}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj make/maka" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen make/maka</SelectItem>
+                      <SelectItem value="">Ingen make/maka</SelectItem>
                       {getPotentialSpouses().map((member) => (
                         <SelectItem key={member.id} value={member.id}>
-                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                          {`${member.firstName} ${member.lastName}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
