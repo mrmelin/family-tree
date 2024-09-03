@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 const buildFamilyTree = (members) => {
-  console.log("Building family tree with members:", members);
   const memberMap = new Map(members.map(member => [member.id, { ...member, children: [] }]));
   const rootMembers = [];
 
@@ -19,38 +18,61 @@ const buildFamilyTree = (members) => {
     }
   });
 
-  console.log("Root members:", rootMembers);
   return rootMembers;
 };
 
-const FamilyMember = ({ member, level = 0 }) => (
-  <div className="relative">
-    <Link to={`/edit-member/${member.id}`}>
-      <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
-          {member.isDeceased && member.deathDate && <p className="text-xs text-muted-foreground">Död: {member.deathDate}</p>}
-        </CardContent>
-      </Card>
-    </Link>
-    {member.children && member.children.length > 0 && (
-      <div className="flex flex-col items-center mt-4">
-        <div className="w-px h-8 bg-gray-300"></div>
-        <div className="flex">
-          {member.children.map((child, index) => (
-            <div key={child.id} className="relative">
-              {index > 0 && <div className="absolute top-0 left-0 w-full h-px bg-gray-300" style={{ top: '-1rem' }}></div>}
-              <FamilyMember member={child} level={level + 1} />
-            </div>
-          ))}
-        </div>
+const FamilyMember = ({ member, level = 0 }) => {
+  const spouse = member.spouseId ? familyMembers.find(m => m.id === member.spouseId) : null;
+
+  return (
+    <div className="relative">
+      <div className="flex items-center">
+        <Link to={`/edit-member/${member.id}`}>
+          <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">Kön: {member.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+              {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
+              {member.isDeceased && member.deathDate && <p className="text-xs text-muted-foreground">Död: {member.deathDate}</p>}
+            </CardContent>
+          </Card>
+        </Link>
+        {spouse && (
+          <>
+            <div className="w-8 h-px bg-gray-300"></div>
+            <Link to={`/edit-member/${spouse.id}`}>
+              <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
+                <CardHeader>
+                  <CardTitle className="text-sm">{`${spouse.firstName} ${spouse.lastName || ''}`}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">Kön: {spouse.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+                  {spouse.birthDate && <p className="text-xs text-muted-foreground">Född: {spouse.birthDate}</p>}
+                  {spouse.isDeceased && spouse.deathDate && <p className="text-xs text-muted-foreground">Död: {spouse.deathDate}</p>}
+                </CardContent>
+              </Card>
+            </Link>
+          </>
+        )}
       </div>
-    )}
-  </div>
-);
+      {member.children && member.children.length > 0 && (
+        <div className="flex flex-col items-center mt-4">
+          <div className="w-px h-8 bg-gray-300"></div>
+          <div className="flex">
+            {member.children.map((child, index) => (
+              <div key={child.id} className="relative">
+                {index > 0 && <div className="absolute top-0 left-0 w-full h-px bg-gray-300" style={{ top: '-1rem' }}></div>}
+                <FamilyMember member={child} level={level + 1} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const FamilyTree = () => {
   const [zoom, setZoom] = useState(100);

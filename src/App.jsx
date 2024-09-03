@@ -18,61 +18,66 @@ const defaultFamilyMembers = [
     id: "1",
     firstName: "Peter",
     lastName: "Melin",
+    gender: "male",
     birthDate: "1955-03-15",
     birthPlace: "Stockholm",
     isDeceased: false,
     bio: "Family patriarch",
     fatherId: null,
     motherId: null,
-    childrenIds: ["3", "4"]
+    spouseId: "2"
   },
   {
     id: "2",
     firstName: "Birgitta",
     lastName: "Melin",
+    gender: "female",
     birthDate: "1958-07-22",
     birthPlace: "Göteborg",
     isDeceased: false,
     bio: "Family matriarch",
     fatherId: null,
     motherId: null,
-    childrenIds: ["3", "4"]
+    spouseId: "1"
   },
   {
     id: "3",
     firstName: "Ola",
     lastName: "Melin",
+    gender: "male",
     birthDate: "1985-11-10",
     birthPlace: "Stockholm",
     isDeceased: false,
     bio: "Eldest son",
     fatherId: "1",
     motherId: "2",
-    childrenIds: ["5"]
+    spouseId: null
   },
   {
     id: "4",
     firstName: "Elin",
     lastName: "Melin",
+    gender: "female",
     birthDate: "1988-04-05",
     birthPlace: "Stockholm",
     isDeceased: false,
     bio: "Daughter",
     fatherId: "1",
     motherId: "2",
-    childrenIds: []
+    spouseId: null
   },
   {
     id: "5",
     firstName: "Filip",
     lastName: "Melin",
+    gender: "male",
     birthDate: "2015-09-20",
     birthPlace: "Stockholm",
     isDeceased: false,
     bio: "Grandson",
     fatherId: "3",
     motherId: null,
-    childrenIds: []
+    spouseId: null
   }
 ];
 

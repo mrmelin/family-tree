@@ -10,19 +10,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
   lastName: z.string().optional(),
+  gender: z.enum(["male", "female"]),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   birthPlace: z.string().optional(),
   isDeceased: z.boolean().default(false),
   deathDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Använd formatet ÅÅÅÅ-MM-DD." }).optional().or(z.literal('')),
   deathPlace: z.string().optional(),
   bio: z.string().max(500, { message: "Biografin får inte överstiga 500 tecken." }).optional(),
-  fatherId: z.string().optional(),
-  motherId: z.string().optional(),
-  childrenIds: z.array(z.string()).optional(),
+  fatherId: z.string().nullable().optional(),
+  motherId: z.string().nullable().optional(),
+  spouseId: z.string().nullable().optional(),
 });
 
 const AddEditMember = () => {
@@ -36,15 +38,16 @@ const AddEditMember = () => {
     defaultValues: {
       firstName: "",
       lastName: "",
+      gender: "male",
       birthDate: "",
       birthPlace: "",
       isDeceased: false,
       deathDate: "",
       deathPlace: "",
       bio: "",
-      fatherId: "",
-      motherId: "",
-      childrenIds: [],
+      fatherId: null,
+      motherId: null,
+      spouseId: null,
     },
   });
 
@@ -74,20 +77,23 @@ const AddEditMember = () => {
     }
 
     localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
+    toast.success(isEditing ? "Medlem uppdaterad" : "Ny medlem tillagd");
     navigate('/');
   };
 
-  const getPotentialParents = () => {
+  const getPotentialParents = (gender) => {
     const memberBirthDate = form.getValues('birthDate');
     return allMembers.filter(member => 
-      !memberBirthDate || new Date(member.birthDate) < new Date(memberBirthDate)
+      member.gender === gender &&
+      (!memberBirthDate || new Date(member.birthDate) < new Date(memberBirthDate))
     );
   };
 
-  const getPotentialChildren = () => {
+  const getPotentialSpouses = () => {
     const memberBirthDate = form.getValues('birthDate');
     return allMembers.filter(member => 
-      !memberBirthDate || new Date(member.birthDate) > new Date(memberBirthDate)
+      member.id !== id && // Exclude self
+      (!memberBirthDate || Math.abs(new Date(member.birthDate) - new Date(memberBirthDate)) < 365.25 * 50 * 24 * 60 * 60 * 1000) // Within 50 years
     );
   };
 
@@ -121,6 +127,27 @@ const AddEditMember = () => {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kön</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj kön" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="male">Man</SelectItem>
+                      <SelectItem value="female">Kvinna</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -228,7 +255,7 @@ const AddEditMember = () => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Ingen far</SelectItem>
-                      {getPotentialParents().map((member) => (
+                      {getPotentialParents("male").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
                         </SelectItem>
@@ -253,7 +280,7 @@ const AddEditMember = () => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Ingen mor</SelectItem>
-                      {getPotentialParents().map((member) => (
+                      {getPotentialParents("female").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
                         </SelectItem>
@@ -266,52 +293,25 @@ const AddEditMember = () => {
             />
             <FormField
               control={form.control}
-              name="childrenIds"
+              name="spouseId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Barn</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        if (value !== "none") {
-                          field.onChange([...field.value, value]);
-                        }
-                      }}
-                      value="none"
-                    >
+                  <FormLabel>Make/Maka</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || "none"}>
+                    <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Lägg till barn" />
+                        <SelectValue placeholder="Välj make/maka" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Välj barn</SelectItem>
-                        {getPotentialChildren()
-                          .filter((member) => !field.value.includes(member.id))
-                          .map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <div className="mt-2">
-                    {field.value.map((childId) => {
-                      const child = allMembers.find(m => m.id === childId);
-                      return (
-                        <div key={childId} className="flex items-center space-x-2 mt-1">
-                          <span>{`${child?.firstName} ${child?.lastName} (${child?.birthDate || 'Okänt datum'})`}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => field.onChange(field.value.filter((id) => id !== childId))}
-                          >
-                            Ta bort
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Ingen make/maka</SelectItem>
+                      {getPotentialSpouses().map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
