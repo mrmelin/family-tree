@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -11,8 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { db } from "@/lib/firebase";
-import { ref, set, get } from "firebase/database";
 
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
@@ -28,39 +25,11 @@ const memberSchema = z.object({
   childrenIds: z.array(z.string()).optional(),
 });
 
-const fetchMember = async (id) => {
-  const snapshot = await get(ref(db, `members/${id}`));
-  return snapshot.val();
-};
-
-const fetchAllMembers = async () => {
-  const snapshot = await get(ref(db, 'members'));
-  return snapshot.val() || {};
-};
-
-const saveMember = async (data) => {
-  const memberId = data.id || Date.now().toString();
-  await set(ref(db, `members/${memberId}`), { ...data, id: memberId });
-  return { ...data, id: memberId };
-};
-
 const AddEditMember = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const [allMembers, setAllMembers] = useState([]);
   const isEditing = !!id;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: existingMember, isLoading: isLoadingMember } = useQuery({
-    queryKey: ['member', id],
-    queryFn: () => fetchMember(id),
-    enabled: isEditing,
-  });
-
-  const { data: allMembers = {} } = useQuery({
-    queryKey: ['allMembers'],
-    queryFn: fetchAllMembers,
-  });
 
   const form = useForm({
     resolver: zodResolver(memberSchema),
@@ -80,38 +49,47 @@ const AddEditMember = () => {
   });
 
   useEffect(() => {
-    if (isEditing && existingMember) {
-      form.reset(existingMember);
-    }
-  }, [isEditing, existingMember, form]);
+    const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+    setAllMembers(storedMembers);
 
-  const mutation = useMutation({
-    mutationFn: saveMember,
-    onSuccess: () => {
-      setIsSubmitting(false);
-      queryClient.invalidateQueries(['allMembers']);
-      queryClient.invalidateQueries(['familyTree']);
-      navigate('/');
-    },
-    onError: (error) => {
-      console.error("Fel vid sparande av medlem:", error);
-      setIsSubmitting(false);
-    },
-  });
+    if (isEditing) {
+      const memberToEdit = storedMembers.find(member => member.id === id);
+      if (memberToEdit) {
+        form.reset(memberToEdit);
+      }
+    }
+  }, [isEditing, id, form]);
 
   const onSubmit = (data) => {
-    setIsSubmitting(true);
+    const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+    let updatedMembers;
+
     if (isEditing) {
-      data.id = id;
+      updatedMembers = storedMembers.map(member => 
+        member.id === id ? { ...member, ...data, id } : member
+      );
+    } else {
+      const newMember = { ...data, id: Date.now().toString() };
+      updatedMembers = [...storedMembers, newMember];
     }
-    mutation.mutate(data);
+
+    localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
+    navigate('/');
   };
 
-  if (isEditing && isLoadingMember) return <div>Laddar...</div>;
+  const getPotentialParents = () => {
+    const memberBirthDate = form.getValues('birthDate');
+    return allMembers.filter(member => 
+      !memberBirthDate || new Date(member.birthDate) < new Date(memberBirthDate)
+    );
+  };
 
-  const sortedMembers = Object.values(allMembers).sort((a, b) => {
-    return new Date(a.birthDate || '9999-12-31') - new Date(b.birthDate || '9999-12-31');
-  });
+  const getPotentialChildren = () => {
+    const memberBirthDate = form.getValues('birthDate');
+    return allMembers.filter(member => 
+      !memberBirthDate || new Date(member.birthDate) > new Date(memberBirthDate)
+    );
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -250,7 +228,7 @@ const AddEditMember = () => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Ingen far</SelectItem>
-                      {sortedMembers.map((member) => (
+                      {getPotentialParents().map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
                         </SelectItem>
@@ -275,7 +253,7 @@ const AddEditMember = () => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">Ingen mor</SelectItem>
-                      {sortedMembers.map((member) => (
+                      {getPotentialParents().map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName} (${member.birthDate || 'Okänt datum'})`}
                         </SelectItem>
@@ -306,7 +284,7 @@ const AddEditMember = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Välj barn</SelectItem>
-                        {sortedMembers
+                        {getPotentialChildren()
                           .filter((member) => !field.value.includes(member.id))
                           .map((member) => (
                             <SelectItem key={member.id} value={member.id}>
@@ -317,26 +295,29 @@ const AddEditMember = () => {
                     </Select>
                   </FormControl>
                   <div className="mt-2">
-                    {field.value.map((childId) => (
-                      <div key={childId} className="flex items-center space-x-2 mt-1">
-                        <span>{`${allMembers[childId]?.firstName} ${allMembers[childId]?.lastName} (${allMembers[childId]?.birthDate || 'Okänt datum'})`}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => field.onChange(field.value.filter((id) => id !== childId))}
-                        >
-                          Ta bort
-                        </Button>
-                      </div>
-                    ))}
+                    {field.value.map((childId) => {
+                      const child = allMembers.find(m => m.id === childId);
+                      return (
+                        <div key={childId} className="flex items-center space-x-2 mt-1">
+                          <span>{`${child?.firstName} ${child?.lastName} (${child?.birthDate || 'Okänt datum'})`}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => field.onChange(field.value.filter((id) => id !== childId))}
+                          >
+                            Ta bort
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Sparar..." : "Spara medlem"}
+            <Button type="submit">
+              {isEditing ? "Uppdatera medlem" : "Lägg till medlem"}
             </Button>
           </form>
         </Form>

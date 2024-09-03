@@ -1,27 +1,12 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
-import { db } from "@/lib/firebase";
-import { ref, get } from "firebase/database";
-
-const fetchFamilyMembers = async () => {
-  try {
-    console.log("Fetching family members...");
-    const snapshot = await get(ref(db, 'members'));
-    console.log("Fetch completed. Data:", snapshot.val());
-    return snapshot.val() || {};
-  } catch (error) {
-    console.error("Error fetching family members:", error);
-    throw error;
-  }
-};
 
 const buildFamilyTree = (members) => {
   console.log("Building family tree with members:", members);
-  const memberMap = new Map(Object.entries(members).map(([id, member]) => [id, { ...member, children: [] }]));
+  const memberMap = new Map(members.map(member => [member.id, { ...member, children: [] }]));
   const rootMembers = [];
 
   memberMap.forEach(member => {
@@ -69,17 +54,12 @@ const FamilyMember = ({ member, level = 0 }) => (
 
 const FamilyTree = () => {
   const [zoom, setZoom] = useState(100);
-  const { data: familyMembers, isLoading, error } = useQuery({
-    queryKey: ['familyTree'],
-    queryFn: fetchFamilyMembers,
-  });
+  const [familyMembers, setFamilyMembers] = useState([]);
 
   useEffect(() => {
-    console.log("FamilyTree component rendered. isLoading:", isLoading, "error:", error, "familyMembers:", familyMembers);
-  }, [isLoading, error, familyMembers]);
-
-  if (isLoading) return <div>Laddar...</div>;
-  if (error) return <div>Fel: {error.message}</div>;
+    const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+    setFamilyMembers(storedMembers);
+  }, []);
 
   const familyTree = buildFamilyTree(familyMembers);
 
