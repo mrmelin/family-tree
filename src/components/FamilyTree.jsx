@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, User } from "lucide-react";
 
 const buildFamilyTree = (members) => {
   const memberMap = new Map(members.map(member => [member.id, { ...member, children: [] }]));
@@ -33,7 +33,10 @@ const FamilyMember = ({ member, allMembers }) => {
               <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-muted-foreground">Kön: {member.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                <p className="text-xs text-muted-foreground">{member.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+              </div>
               {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
               {member.isDeceased && member.deathDate && <p className="text-xs text-muted-foreground">Död: {member.deathDate}</p>}
             </CardContent>
@@ -48,7 +51,10 @@ const FamilyMember = ({ member, allMembers }) => {
                   <CardTitle className="text-sm">{`${spouse.firstName} ${spouse.lastName || ''}`}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">Kön: {spouse.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    <p className="text-xs text-muted-foreground">{spouse.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+                  </div>
                   {spouse.birthDate && <p className="text-xs text-muted-foreground">Född: {spouse.birthDate}</p>}
                   {spouse.isDeceased && spouse.deathDate && <p className="text-xs text-muted-foreground">Död: {spouse.deathDate}</p>}
                 </CardContent>
