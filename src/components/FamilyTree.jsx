@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ZoomIn, ZoomOut, Maximize2, Male, Female, Trash2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Male as MaleIcon, Female as FemaleIcon, Trash2 } from "lucide-react";
 
 const buildFamilyTree = (members) => {
   const memberMap = new Map(members.map(member => [member.id, { ...member, children: [] }]));
@@ -52,7 +52,7 @@ const FamilyMember = ({ member, allMembers, onDelete }) => {
             <CardContent>
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  {member.gender === 'male' ? <Male className="h-4 w-4" /> : <Female className="h-4 w-4" />}
+                  {member.gender === 'male' ? <MaleIcon className="h-4 w-4" /> : <FemaleIcon className="h-4 w-4" />}
                 </p>
                 {member.birthDate && <p className="text-xs text-muted-foreground">Born: {member.birthDate}</p>}
               </div>
@@ -79,7 +79,7 @@ const FamilyMember = ({ member, allMembers, onDelete }) => {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
-                      {spouse.gender === 'male' ? <Male className="h-4 w-4" /> : <Female className="h-4 w-4" />}
+                      {spouse.gender === 'male' ? <MaleIcon className="h-4 w-4" /> : <FemaleIcon className="h-4 w-4" />}
                     </p>
                     {spouse.birthDate && <p className="text-xs text-muted-foreground">Born: {spouse.birthDate}</p>}
                   </div>
