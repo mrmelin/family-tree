@@ -101,7 +101,7 @@ const AddEditMember = () => {
   };
 
   const getPotentialParents = (gender) => {
-    return allMembers.filter(member => member.gender === gender);
+    return allMembers.filter(member => member.gender === gender && member.id !== id);
   };
 
   const getPotentialSpouses = () => {
@@ -265,7 +265,7 @@ const AddEditMember = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen far</SelectItem>
+                      <SelectItem value="">Ingen far</SelectItem>
                       {getPotentialParents("male").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
@@ -290,7 +290,7 @@ const AddEditMember = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen mor</SelectItem>
+                      <SelectItem value="">Ingen mor</SelectItem>
                       {getPotentialParents("female").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
@@ -315,7 +315,7 @@ const AddEditMember = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">Ingen make/maka</SelectItem>
+                      <SelectItem value="">Ingen make/maka</SelectItem>
                       {getPotentialSpouses().map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
