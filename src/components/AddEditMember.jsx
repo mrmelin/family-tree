@@ -11,6 +11,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const memberSchema = z.object({
   firstName: z.string().min(2, { message: "Förnamnet måste vara minst 2 tecken." }),
@@ -78,6 +89,14 @@ const AddEditMember = () => {
 
     localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
     toast.success(isEditing ? "Medlem uppdaterad" : "Ny medlem tillagd");
+    navigate('/');
+  };
+
+  const handleDelete = () => {
+    const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+    const updatedMembers = storedMembers.filter(member => member.id !== id);
+    localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
+    toast.success("Medlem borttagen");
     navigate('/');
   };
 
@@ -308,9 +327,30 @@ const AddEditMember = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">
-              {isEditing ? "Uppdatera medlem" : "Lägg till medlem"}
-            </Button>
+            <div className="flex justify-between">
+              <Button type="submit">
+                {isEditing ? "Uppdatera medlem" : "Lägg till medlem"}
+              </Button>
+              {isEditing && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Ta bort medlem</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Är du säker?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Detta kommer att permanent ta bort familjemedlemmen och kan inte ångras.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>Ta bort</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           </form>
         </Form>
       </CardContent>
