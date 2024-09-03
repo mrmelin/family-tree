@@ -81,8 +81,18 @@ const AddEditMember = () => {
     navigate('/');
   };
 
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this family member?")) {
+      const storedMembers = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+      const updatedMembers = storedMembers.filter(member => member.id !== id);
+      localStorage.setItem('familyMembers', JSON.stringify(updatedMembers));
+      toast.success("Medlem borttagen");
+      navigate('/');
+    }
+  };
+
   const getPotentialParents = (gender) => {
-    return allMembers.filter(member => member.gender === gender);
+    return allMembers.filter(member => member.gender === gender && member.id !== id);
   };
 
   const getPotentialSpouses = () => {
@@ -308,9 +318,16 @@ const AddEditMember = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">
-              {isEditing ? "Uppdatera medlem" : "Lägg till medlem"}
-            </Button>
+            <div className="flex justify-between">
+              <Button type="submit">
+                {isEditing ? "Uppdatera medlem" : "Lägg till medlem"}
+              </Button>
+              {isEditing && (
+                <Button type="button" variant="destructive" onClick={handleDelete}>
+                  Ta bort medlem
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
       </CardContent>
