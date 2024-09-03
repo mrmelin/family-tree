@@ -239,14 +239,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Far</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj far" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen far</SelectItem>
+                      <SelectItem value="none">Ingen far</SelectItem>
                       {getPotentialParents("male").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
@@ -264,14 +264,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj mor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen mor</SelectItem>
+                      <SelectItem value="none">Ingen mor</SelectItem>
                       {getPotentialParents("female").map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
@@ -289,14 +289,14 @@ const AddEditMember = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Make/Maka</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Välj make/maka" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ingen make/maka</SelectItem>
+                      <SelectItem value="none">Ingen make/maka</SelectItem>
                       {getPotentialSpouses().map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {`${member.firstName} ${member.lastName}`}
