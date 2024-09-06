@@ -25,6 +25,7 @@ const memberSchema = z.object({
   fatherId: z.string().nullable().optional(),
   motherId: z.string().nullable().optional(),
   spouseId: z.string().nullable().optional(),
+  image: z.string().optional(),
 });
 
 const AddEditMember = () => {
@@ -48,6 +49,7 @@ const AddEditMember = () => {
       fatherId: null,
       motherId: null,
       spouseId: null,
+      image: "/placeholder.svg",
     },
   });
 
@@ -149,7 +151,7 @@ const AddEditMember = () => {
               name="birthDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Födelsedatum (valfritt)</FormLabel>
+                  <FormLabel>Födelsedatum</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="ÅÅÅÅ-MM-DD" />
                   </FormControl>
@@ -304,6 +306,20 @@ const AddEditMember = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bild URL</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="https://example.com/image.jpg" />
+                  </FormControl>
+                  <FormDescription>Länk till personens bild (lämna tom för standardbild)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -26,7 +26,8 @@ const defaultFamilyMembers = [
     fatherId: null,
     motherId: null,
     spouseId: null,
-    children: ["433", "439", "442", "454", "457", "528", "542", "548", "549"]
+    children: ["433", "439", "442", "454", "457", "528", "542", "548", "549"],
+    image: "/placeholder.svg"
   },
   {
     id: "433",
@@ -40,7 +41,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: ["6"]
+    children: ["6"],
+    image: "/placeholder.svg"
   },
   {
     id: "6",
@@ -54,7 +56,8 @@ const defaultFamilyMembers = [
     fatherId: "433",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "439",
@@ -68,7 +71,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "442",
@@ -82,7 +86,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "454",
@@ -96,7 +101,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "457",
@@ -110,7 +116,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: ["435", "437", "568", "573", "583"]
+    children: ["435", "437", "568", "573", "583"],
+    image: "/placeholder.svg"
   },
   {
     id: "435",
@@ -124,7 +131,8 @@ const defaultFamilyMembers = [
     fatherId: "457",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "437",
@@ -138,7 +146,8 @@ const defaultFamilyMembers = [
     fatherId: "457",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "568",
@@ -152,7 +161,8 @@ const defaultFamilyMembers = [
     fatherId: "457",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "573",
@@ -166,7 +176,8 @@ const defaultFamilyMembers = [
     fatherId: "457",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "583",
@@ -180,7 +191,8 @@ const defaultFamilyMembers = [
     fatherId: "457",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "528",
@@ -194,7 +206,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "542",
@@ -208,7 +221,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "548",
@@ -222,7 +236,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   },
   {
     id: "549",
@@ -236,7 +251,8 @@ const defaultFamilyMembers = [
     fatherId: "407",
     motherId: null,
     spouseId: null,
-    children: []
+    children: [],
+    image: "/placeholder.svg"
   }
 ];
 

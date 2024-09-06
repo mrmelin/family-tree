@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const buildFamilyTree = (members) => {
   const memberMap = new Map(members.map(member => [member.id, { ...member, children: [] }]));
@@ -30,12 +31,16 @@ const FamilyMember = ({ member, allMembers }) => {
         <Link to={`/edit-member/${member.id}`}>
           <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-sm">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
+              <Avatar className="w-16 h-16 mx-auto">
+                <AvatarImage src={member.image} alt={`${member.firstName} ${member.lastName}`} />
+                <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
+              </Avatar>
+              <CardTitle className="text-sm text-center">{`${member.firstName} ${member.lastName || ''}`}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-muted-foreground">Kön: {member.gender === 'male' ? 'Man' : 'Kvinna'}</p>
-              {member.birthDate && <p className="text-xs text-muted-foreground">Född: {member.birthDate}</p>}
-              {member.isDeceased && member.deathDate && <p className="text-xs text-muted-foreground">Död: {member.deathDate}</p>}
+              <p className="text-xs text-muted-foreground text-center">Kön: {member.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+              {member.birthDate && <p className="text-xs text-muted-foreground text-center">Född: {member.birthDate}</p>}
+              {member.isDeceased && member.deathDate && <p className="text-xs text-muted-foreground text-center">Död: {member.deathDate}</p>}
             </CardContent>
           </Card>
         </Link>
@@ -45,12 +50,16 @@ const FamilyMember = ({ member, allMembers }) => {
             <Link to={`/edit-member/${spouse.id}`}>
               <Card className="w-48 m-2 hover:shadow-md transition-shadow duration-300">
                 <CardHeader>
-                  <CardTitle className="text-sm">{`${spouse.firstName} ${spouse.lastName || ''}`}</CardTitle>
+                  <Avatar className="w-16 h-16 mx-auto">
+                    <AvatarImage src={spouse.image} alt={`${spouse.firstName} ${spouse.lastName}`} />
+                    <AvatarFallback>{spouse.firstName[0]}{spouse.lastName[0]}</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-sm text-center">{`${spouse.firstName} ${spouse.lastName || ''}`}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">Kön: {spouse.gender === 'male' ? 'Man' : 'Kvinna'}</p>
-                  {spouse.birthDate && <p className="text-xs text-muted-foreground">Född: {spouse.birthDate}</p>}
-                  {spouse.isDeceased && spouse.deathDate && <p className="text-xs text-muted-foreground">Död: {spouse.deathDate}</p>}
+                  <p className="text-xs text-muted-foreground text-center">Kön: {spouse.gender === 'male' ? 'Man' : 'Kvinna'}</p>
+                  {spouse.birthDate && <p className="text-xs text-muted-foreground text-center">Född: {spouse.birthDate}</p>}
+                  {spouse.isDeceased && spouse.deathDate && <p className="text-xs text-muted-foreground text-center">Död: {spouse.deathDate}</p>}
                 </CardContent>
               </Card>
             </Link>
